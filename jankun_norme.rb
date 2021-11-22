@@ -206,7 +206,6 @@ class CodingStyleChecker
       check_misplaced_pointer_symbol
       check_comma_missing_space
       check_misplaced_comments
-      check_return_without_parentheses
       check_operators_spaces
       check_condition_assignment
       check_l_o_lowercase
