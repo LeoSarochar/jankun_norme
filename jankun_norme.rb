@@ -9,7 +9,7 @@ $major = 0
 $minor = 0
 $info = 0
 
-$func_pattern = /^.*?(unsigned|signed)?\s*(void|int|char|short|long|float|double|bool|size_t)\s+((\w|\*)+)\s*\([^)]*\)[^;]\s*/
+$func_pattern = /^.*?(unsigned|signed)?\s*(void|int|char|short|long|float|double|bool|size_t)\s+((\w|\*)+)\s*\([^)]*(,|\))[^;]\s+/
 $func_prototype_pattern = /^.*?(unsigned|signed)?\s*(void|int|char|short|long|float|double|bool|size_t)\s+((\w|\*)+)\s*\([^)]*\);\s*/
 
 class String
@@ -568,7 +568,7 @@ class CodingStyleChecker
       if line =~ /^\s*\/\// #Skip commented lines
         next;
       end
-      functions += 1 if line =~ $func_pattern
+      functions += 1;print(line) if line =~ $func_pattern
     end
     if functions > 5
       msg_brackets = '[' + @file_path + ']'
