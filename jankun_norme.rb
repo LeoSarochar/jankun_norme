@@ -2,7 +2,6 @@
 # Jankun_Norme_v1.4.0
 # Jankun Norminette
 # Based on normez, edited by LÃ©o Sarochar 2020.
-# Changelog: Replacing L3 by G8
 
 require 'optparse'
 require 'tmpdir'
@@ -991,7 +990,7 @@ class UpdateManager
     @current = `cat #{@script_path} | grep 'Jankun_Norme_v' | cut -c 17- | head -1 | tr -d '.'`
     @latest = `cat #{@remote_path} | grep 'Jankun_Norme_v' | cut -c 17- | head -1 | tr -d '.'`
     @latest_disp = `cat #{@remote_path} | grep 'Jankun_Norme_v' | cut -c 17- | head -1`
-    return true if @current < @latest
+    return true if @current.to_i < @latest.to_i
 
     clean_update_files
     false
