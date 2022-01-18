@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-# Jankun_Norme_v1.4.2
+# Jankun_Norme_v1.4.3
 # Jankun Norminette
 # Based on normez, edited by LÃ©o Sarochar 2020.
 
@@ -204,6 +204,7 @@ class CodingStyleChecker
       check_too_many_parameters
       check_curly_brackets
       check_space_after_keywords
+      check_double_spaces
       check_misplaced_pointer_symbol
       check_comma_missing_space
       check_misplaced_comments
@@ -708,6 +709,23 @@ class CodingStyleChecker
       line.scan(/(return|if|else if|else|while|for)\(/) do |match|
         msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
         msg_error = " L3 - Missing space after keyword '" + match[0] + "'."
+        $minor += 1
+        puts(msg_brackets.bold.green + msg_error.bold)
+      end
+      line_nb += 1
+    end
+  end
+
+  def check_double_spaces
+    line_nb = 1
+    @file.each_line do |line|
+      if line =~ /^\s*\/\// #Skip commented lines
+        line_nb += 1;
+        next;
+      end
+      if line =~ /\w+  .+/
+        msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
+        msg_error = " L3 - Misplaced space(s)"
         $minor += 1
         puts(msg_brackets.bold.green + msg_error.bold)
       end
