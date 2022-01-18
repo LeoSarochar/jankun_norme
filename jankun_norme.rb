@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-# Jankun_Norme_v1.4.0
+# Jankun_Norme_v1.4.1
 # Jankun Norminette
 # Based on normez, edited by LÃ©o Sarochar 2020.
 
@@ -212,6 +212,7 @@ class CodingStyleChecker
       check_l_o_lowercase
       check_global_const
       check_space_between_func_parantheses
+      check_line_break_at_the_end
       #check_ternary_flow
       if @type == FileType::SOURCE
         check_bad_header_separation
@@ -963,6 +964,15 @@ class CodingStyleChecker
         puts(msg_brackets.bold.grey + msg_error.bold)
       end
       line_nb += 1
+    end
+  end
+
+  def check_line_break_at_the_end
+    if @file[-1] != "\n"
+      msg_brackets = '[' + @file_path + ']'
+      msg_error = ' A3 - File should end with a line break'
+      $info += 1
+      puts(msg_brackets.bold.grey + msg_error.bold)
     end
   end
 end
