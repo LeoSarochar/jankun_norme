@@ -211,7 +211,6 @@ class CodingStyleChecker
       check_l_o_lowercase
       check_global_const
       check_space_between_func_parantheses
-      check_indentation_of_preprocessor_directives
       #check_ternary_flow
       if @type == FileType::SOURCE
         check_bad_header_separation
@@ -221,6 +220,8 @@ class CodingStyleChecker
         check_empty_line_between_functions
       end
       #check_macro_used_as_constant if @type == FileType::HEADER
+    elsif @type == FileType::HEADER
+      check_indentation_of_preprocessor_directives
     elsif @type == FileType::MAKEFILE
       check_header_makefile
     end
