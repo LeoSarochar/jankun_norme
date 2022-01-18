@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-# Jankun_Norme_v1.3.0
+# Jankun_Norme_v1.3.1
 # Jankun Norminette
 # Based on normez, edited by LÃ©o Sarochar 2020.
 
@@ -987,9 +987,9 @@ class UpdateManager
       clean_update_files
       return false
     end
-    @current = `cat #{@script_path} | grep 'Jankun_Norme_v' | cut -c 11- | head -1 | tr -d '.'`
-    @latest = `cat #{@remote_path} | grep 'Jankun_Norme_v' | cut -c 11- | head -1 | tr -d '.'`
-    @latest_disp = `cat #{@remote_path} | grep 'Jankun_Norme_v' | cut -c 11- | head -1`
+    @current = `cat #{@script_path} | grep 'Jankun_Norme_v' | cut -c 17- | head -1 | tr -d '.'`
+    @latest = `cat #{@remote_path} | grep 'Jankun_Norme_v' | cut -c 17- | head -1 | tr -d '.'`
+    @latest_disp = `cat #{@remote_path} | grep 'Jankun_Norme_v' | cut -c 17- | head -1`
     return true if @current < @latest
 
     clean_update_files
@@ -1001,8 +1001,8 @@ class UpdateManager
 
     update_msg = `cat #{@remote_path} | grep 'Changelog: ' | cut -c 14- | head -1 | tr -d '.'`
     print("A new version is available : Jankun Norme v#{@latest_disp}".bold.yellow)
-    print(' => Changelog : '.bold)
-    print(update_msg.to_s.bold.blue)
+    # print(' => Changelog : '.bold)
+    # print(update_msg.to_s.bold.blue)
     response = nil
     Kernel.loop do
       print('Update Jankun Norme ? [Y/n]: ')
@@ -1015,11 +1015,11 @@ class UpdateManager
       return
     end
     puts('Downloading update...')
-    system("cat #{@script_path} > #{@backup_path}")
-    exit_code = system("cat #{@remote_path} > #{@script_path}")
+    system("sudo cat #{@script_path} > #{@backup_path}")
+    exit_code = system("sudo cat #{@remote_path} > #{@script_path}")
     unless exit_code
       print('Error while updating! Cancelling...'.bold.red)
-      system("cat #{@backup_path} > #{@script_path}")
+      system("sudo cat #{@backup_path} > #{@script_path}")
       clean_update_files
       Kernel.exit(false)
     end
