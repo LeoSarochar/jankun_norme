@@ -514,12 +514,12 @@ class CodingStyleChecker
       end
       if line =~ / $/
         msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
-        msg_error = ' L3 - Trailing space(s) at the end of the line'
+        msg_error = ' G8 - Trailing space(s) at the end of the line'
         $minor += 1
         puts(msg_brackets.bold.green + msg_error.bold)
       elsif line =~ /\t$/
         msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
-        msg_error = ' L3 - Trailing tabulation(s) at the end of the line'
+        msg_error = ' G8 - Trailing tabulation(s) at the end of the line'
         $minor += 1
         puts(msg_brackets.bold.green + msg_error.bold)
       end
