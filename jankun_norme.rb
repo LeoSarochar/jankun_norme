@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-# Jankun_Norme_v1.4.1
+# Jankun_Norme_v1.4.2
 # Jankun Norminette
 # Based on normez, edited by LÃ©o Sarochar 2020.
 
@@ -10,7 +10,7 @@ $major = 0
 $minor = 0
 $info = 0
 
-$func_pattern = /^.*?(unsigned|signed)?\s*(sf\w+|_s|_t|void|int|char|short|long|float|double|bool|size_t)\s+((\w|\*)+)\s*\([^)]*(,|\))[^;]\s*/
+$func_pattern = /^.*?(unsigned|signed)?\s*(sf\w+|_s|_t|void|int|char|short|long|float|double|bool|size_t)\s+((\w|\*)+)\s*\([^)]*(,\n|\)[^;]\s*)/
 $func_prototype_pattern = /^.*?(unsigned|signed)?\s*(sf\w+|_s|_t|void|int|char|short|long|float|double|bool|size_t)\s+((\w|\*)+)\s*\([^)]*\);\s*/
 
 class String
@@ -566,11 +566,15 @@ class CodingStyleChecker
 
   def check_functions_per_file
     functions = 0
-    @file.each_line do |line|
+    tab = @file.split(/\n/).map { |line| line + "\n" }
+    for i in 0..tab.length-1
+      line = tab[i]
       if line =~ /^\s*\/\// #Skip commented lines
         next;
       end
-      functions += 1 if line =~ $func_pattern
+      if line =~ $func_pattern && tab[i+1] !~ /\w+\);/
+        functions += 1
+      end
     end
     if functions > 5
       msg_brackets = '[' + @file_path + ']'
@@ -1025,11 +1029,11 @@ class UpdateManager
       return
     end
     puts('Downloading update...')
-    system("sudo cat #{@script_path} > #{@backup_path}")
-    exit_code = system("sudo cat #{@remote_path} > #{@script_path}")
+    system("cat #{@script_path} > #{@backup_path}")
+    exit_code = system("cat #{@remote_path} > #{@script_path}")
     unless exit_code
       print('Error while updating! Cancelling...'.bold.red)
-      system("sudo cat #{@backup_path} > #{@script_path}")
+      system("cat #{@backup_path} > #{@script_path}")
       clean_update_files
       Kernel.exit(false)
     end
