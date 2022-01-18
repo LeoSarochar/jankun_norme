@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+# Jankun_Norme_v1.3.0
 # Jankun Norminette
 # Based on normez, edited by LÃ©o Sarochar 2020.
 
@@ -966,6 +967,67 @@ class CodingStyleChecker
   end
 end
 
+class UpdateManager
+  def initialize(script_path)
+    path = File.dirname(script_path)
+    tmp_dir = Dir.tmpdir
+    @script_path = script_path
+    @remote_path = "#{tmp_dir}/__jankun_norme_remote"
+    @backup_path = "#{tmp_dir}/__jankun_norme_backup"
+    @remote = system("curl -s https://raw.githubusercontent.com/LeoSarochar/jankun_norme/main/jankun_norme.rb > #{@remote_path}")
+  end
+
+  def clean_update_files
+    system("rm -rf #{@backup_path}")
+    system("rm -rf #{@remote_path}")
+  end
+
+  def can_update
+    unless @remote
+      clean_update_files
+      return false
+    end
+    @current = `cat #{@script_path} | grep 'Jankun_Norme_v' | cut -c 11- | head -1 | tr -d '.'`
+    @latest = `cat #{@remote_path} | grep 'Jankun_Norme_v' | cut -c 11- | head -1 | tr -d '.'`
+    @latest_disp = `cat #{@remote_path} | grep 'Jankun_Norme_v' | cut -c 11- | head -1`
+    return true if @current < @latest
+
+    clean_update_files
+    false
+  end
+
+  def update
+    return unless @current < @latest
+
+    update_msg = `cat #{@remote_path} | grep 'Changelog: ' | cut -c 14- | head -1 | tr -d '.'`
+    print("A new version is available : Jankun Norme v#{@latest_disp}".bold.yellow)
+    print(' => Changelog : '.bold)
+    print(update_msg.to_s.bold.blue)
+    response = nil
+    Kernel.loop do
+      print('Update Jankun Norme ? [Y/n]: ')
+      response = gets.chomp
+      break if ['N', 'n', 'no', 'Y', 'y', 'yes', ''].include?(response)
+    end
+    if %w[N n no].include?(response)
+      puts('Update skipped. You can also use the --no-update (or -u) option to prevent auto-updating.'.bold.blue)
+      clean_update_files
+      return
+    end
+    puts('Downloading update...')
+    system("cat #{@script_path} > #{@backup_path}")
+    exit_code = system("cat #{@remote_path} > #{@script_path}")
+    unless exit_code
+      print('Error while updating! Cancelling...'.bold.red)
+      system("cat #{@backup_path} > #{@script_path}")
+      clean_update_files
+      Kernel.exit(false)
+    end
+    clean_update_files
+    puts('Jankun Norme has been successfully updated!'.bold.green)
+    Kernel.exit(true)
+  end
+end
 
 $options = {}
 opt_parser = OptionParser.new do |opts|
@@ -994,6 +1056,11 @@ rescue OptionParser::InvalidOption => e
   puts('Error: ' + e.to_s)
   puts(opt_parser.banner)
   Kernel.exit(false)
+end
+
+unless $options.include?(:noupdate)
+  updater = UpdateManager.new($PROGRAM_NAME)
+  updater.update if updater.can_update
 end
 
 files_retriever = FilesRetriever.new
