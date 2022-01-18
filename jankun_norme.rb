@@ -9,8 +9,8 @@ $major = 0
 $minor = 0
 $info = 0
 
-$func_pattern = /^.*?(unsigned|signed)?\s*(void|int|char|short|long|float|double)\s+((\w|\*)+)\s*\([^)]*\)[^;]\s*/
-$func_prototype_pattern = /^.*?(unsigned|signed)?\s*(void|int|char|short|long|float|double)\s+((\w|\*)+)\s*\([^)]*\);\s*/
+$func_pattern = /^.*?(unsigned|signed)?\s*(void|int|char|short|long|float|double|bool|size_t)\s+((\w|\*)+)\s*\([^)]*\)[^;]\s*/
+$func_prototype_pattern = /^.*?(unsigned|signed)?\s*(void|int|char|short|long|float|double|bool|size_t)\s+((\w|\*)+)\s*\([^)]*\);\s*/
 
 class String
   def each_char
@@ -211,6 +211,7 @@ class CodingStyleChecker
       check_l_o_lowercase
       check_global_const
       check_space_between_func_parantheses
+      check_indentation_of_preprocessor_directives
       #check_ternary_flow
       if @type == FileType::SOURCE
         check_bad_header_separation
@@ -452,6 +453,35 @@ class CodingStyleChecker
         msg_error = ' C1 - Nested conditonal branchings with a depth of 3 or more should be avoided and an if block should not contain more than 3 branchings'
         $minor += 1
         puts(msg_brackets.bold.green + msg_error.bold)
+      end
+      line_nb += 1
+    end
+  end
+
+  def check_indentation_of_preprocessor_directives
+    line_nb = 1
+    indentation_level = 0
+    @file.each_line do |line|
+      if line.length == 1 || line =~ /^\s*\/\// || line =~ /^\/\*/ || line =~ /\*\*/ || line =~ /\*\// #Skip commented lines
+        line_nb += 1;
+        next;
+      end
+      if line =~ /^#\s*if/
+        indentation_level += 1
+      elsif line =~ /^#\s*endif/
+        indentation_level -= 1
+      else
+        if line =~ /^#/ && indentation_level > 0
+          msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
+          msg_error = ' G3 - Preprocessor directives should be indented'
+          $minor += 1
+          puts(msg_brackets.bold.green + msg_error.bold)
+        elsif line =~ /^\s+\w+/
+          msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
+          msg_error = ' G3 - Preprocessor directives should be indented'
+          $minor += 1
+          puts(msg_brackets.bold.green + msg_error.bold)
+        end
       end
       line_nb += 1
     end
