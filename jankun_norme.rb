@@ -1,7 +1,8 @@
 #!/usr/bin/ruby
-# Jankun_Norme_v1.3.1
+# Jankun_Norme_v1.4.0
 # Jankun Norminette
 # Based on normez, edited by LÃ©o Sarochar 2020.
+# Changelog: Replacing L3 by G8
 
 require 'optparse'
 require 'tmpdir'
@@ -10,8 +11,8 @@ $major = 0
 $minor = 0
 $info = 0
 
-$func_pattern = /^.*?(unsigned|signed)?\s*(void|int|char|short|long|float|double|bool|size_t)\s+((\w|\*)+)\s*\([^)]*(,|\))[^;]\s+/
-$func_prototype_pattern = /^.*?(unsigned|signed)?\s*(void|int|char|short|long|float|double|bool|size_t)\s+((\w|\*)+)\s*\([^)]*\);\s*/
+$func_pattern = /^.*?(unsigned|signed)?\s*(sf\w+|_s|_t|void|int|char|short|long|float|double|bool|size_t)\s+((\w|\*)+)\s*\([^)]*(,|\))[^;]\s*/
+$func_prototype_pattern = /^.*?(unsigned|signed)?\s*(sf\w+|_s|_t|void|int|char|short|long|float|double|bool|size_t)\s+((\w|\*)+)\s*\([^)]*\);\s*/
 
 class String
   def each_char
