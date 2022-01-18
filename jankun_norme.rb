@@ -568,7 +568,7 @@ class CodingStyleChecker
       if line =~ /^\s*\/\// #Skip commented lines
         next;
       end
-      functions += 1;print(line) if line =~ $func_pattern
+      functions += 1 if line =~ $func_pattern
     end
     if functions > 5
       msg_brackets = '[' + @file_path + ']'
