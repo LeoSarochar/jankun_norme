@@ -214,12 +214,12 @@ class CodingStyleChecker
       check_global_const
       check_space_between_func_parantheses
       check_line_break_at_the_end
+      check_typedef
       #check_ternary_flow
       if @type == FileType::SOURCE
         check_bad_header_separation
         check_functions_per_file
         check_function_lines
-        check_typedef
         check_empty_line_between_functions
       end
       #check_macro_used_as_constant if @type == FileType::HEADER
@@ -309,10 +309,17 @@ class CodingStyleChecker
         next;
       end
       if line =~ /typedef/
+        words = line.scan(/(\w+)/)
         if line !~ /(_t;)$/
           msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
           msg_error = ' V1 - The type names defined with typedef doesn\'t have "_t" in the end'
           puts(msg_brackets.bold.red + msg_error.bold)
+          $major += 1
+        elsif words[2][0] =~ /[^a-z_0-9]/ or words[3][0] =~ /[^a-z_0-9]/
+            msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
+            msg_error = ' V1 - The type names must be composed exclusively of lowercase, numbers, and underscores'
+            puts(msg_brackets.bold.red + msg_error.bold)
+            $major += 1
         end
       end
       line_nb += 1
@@ -821,12 +828,18 @@ class CodingStyleChecker
         line_nb += 1;
         next;
       end
-      line.scan(/,[^ \n]/) do
-        msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
-        msg_error = ' L3 - Missing space after comma'
-        $minor += 1
-        puts(msg_brackets.bold.green + msg_error.bold)
-      end
+      quoted = false
+      line.chars.each_with_index{|i, index|
+        if i.include? "\"" or i.include? "\'"
+           quoted = !quoted
+        end
+        if !quoted and i == ',' and line[index + 1] != ' ' and !line[index + 1].include?("\n")
+            msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
+            msg_error = ' L3 - Missing space after comma'
+            $minor += 1
+            puts(msg_brackets.bold.green + msg_error.bold)
+        end
+     }
       line_nb += 1
     end
   end
