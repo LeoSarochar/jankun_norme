@@ -254,8 +254,8 @@ class CodingStyleChecker
     line_nb = 1
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       length = 0
       line.each_char do |char|
@@ -305,8 +305,8 @@ class CodingStyleChecker
     line_nb = 1
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       if line =~ /typedef/
         words = line.scan(/(\w+)/)
@@ -335,8 +335,8 @@ class CodingStyleChecker
     many_lines = []
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       if line =~ $func_pattern
         function_start = line_nb
@@ -345,9 +345,9 @@ class CodingStyleChecker
         if function_start != -1
           scope_lvl += line.count '{'
           scope_lvl -= line.count '}'
-          if (scope_lvl > 0)
-            if (count > 21 && sec_count > 4)
-              many_lines.push(line_nb);
+          if scope_lvl > 0
+            if count > 21 && sec_count > 4
+              many_lines.push(line_nb)
               sec_count = 0
             end
           else
@@ -373,8 +373,8 @@ class CodingStyleChecker
     line_nb = 1
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       if line =~ /^[ \t]*for ?\(/
         line_nb += 1
@@ -398,8 +398,8 @@ class CodingStyleChecker
     line_nb = 1
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       line.scan(/(^|[^0-9a-zA-Z_])(printf|dprintf|fprintf|vprintf|sprintf|snprintf|vprintf|vfprintf|vsprintf|vsnprintf|asprintf|scranf|memcpy|memset|memmove|strcat|strchar|strcpy|atoi|strlen|strncat|strncpy|strcasestr|strncasestr|strcmp|strncmp|strtok|strnlen|strdup|realloc)[^0-9a-zA-Z]/) do
         unless $options.include? :ignorefunctions
@@ -425,8 +425,8 @@ class CodingStyleChecker
     count = 0
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       line[0] = '' while [' ', "\t"].include?(line[0])
       if line =~ /^if ?\(/
@@ -448,10 +448,26 @@ class CodingStyleChecker
   def check_nested_conditional_branching
     line_nb = 1
     in_switch = 0
+    scope_depth = 0
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
+      end
+      quoted = false
+      o_bracket_index = line.index('{')
+      c_bracket_index = line.index('}')
+      if o_bracket_index or c_bracket_index
+        line.chars.each_with_index{|i, index|
+          if i.include? "\"" or i.include? "\'"
+            quoted = !quoted
+          end
+          if !quoted && index == o_bracket_index
+            scope_depth += 1
+          elsif !quoted && index === c_bracket_index
+            scope_depth -= 1
+          end
+        }
       end
       if line =~ /switch\s*(.*)\s*\{/
         in_switch = line.length - line.lstrip.length
@@ -459,7 +475,8 @@ class CodingStyleChecker
       if in_switch != 0 && in_switch == (line.length - line.lstrip.length) && line =~ /\}/
         in_switch = 0
       end
-      if in_switch == 0 && line =~ /^( {16})|(\t{4})/
+      if (scope_depth > 3 && in_switch == 0 && line =~ /^( {16})|(\t{4})/) or (o_bracket_index == nil and scope_depth >= 3 and line =~ /(^\s*if ?\()|(^\s*while ?\()|(^\s*for ?\()|(^\s*switch ?\()|(^\s*else ?\()/)
+        puts scope_depth
         msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
         msg_error = ' C1 - Nested conditonal branchings with a depth of 3 or more should be avoided and an if block should not contain more than 3 branchings'
         $minor += 1
@@ -474,8 +491,8 @@ class CodingStyleChecker
     indentation_level = 0
     @file.each_line do |line|
       if line.length == 1 || line =~ /^\s*\/\// || line =~ /^\/\*/ || line =~ /\*\*/ || line =~ /\*\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       if line =~ /^#\s*if/
         indentation_level += 1
@@ -502,8 +519,8 @@ class CodingStyleChecker
     line_nb = 1
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       if line =~ /return(\(|\s+|.*+;)/ && line !~ /return\s*\(.*\)/
         msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
@@ -519,8 +536,8 @@ class CodingStyleChecker
     line_nb = 1
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       if line =~ / $/
         msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
@@ -550,8 +567,8 @@ class CodingStyleChecker
     end
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       indent = 0
       while line[indent] == valid_indent
@@ -578,7 +595,7 @@ class CodingStyleChecker
     for i in 0..tab.length-1
       line = tab[i]
       if line =~ /^\s*\/\// #Skip commented lines
-        next;
+        next
       end
       if line =~ $func_pattern && tab[i+1] !~ /\w+\);/
         functions += 1
@@ -596,8 +613,8 @@ class CodingStyleChecker
     line_nb = 1
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       if line =~ /[^'"]\s\?.*(:.*\w\(.*\))|(\w\(.*\).*:.*)/
         msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
@@ -605,7 +622,7 @@ class CodingStyleChecker
         $info += 1
         puts(msg_brackets.bold.grey + msg_error.bold)
       end
-      line_nb += 1;
+      line_nb += 1
     end
   end
 
@@ -613,8 +630,8 @@ class CodingStyleChecker
     line_nb = 1
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       if line =~ /^static\s*inline/ || line =~ /^#define/ #|| line =~ $func_prototype_pattern
         msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
@@ -622,7 +639,7 @@ class CodingStyleChecker
         $major += 1
         puts(msg_brackets.bold.red + msg_error.bold)
       end
-      line_nb += 1;
+      line_nb += 1
     end
   end
 
@@ -631,8 +648,8 @@ class CodingStyleChecker
     missing_bracket = false
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       if line =~ /^.*?(unsigned|signed)?\s*(void|int|char|short|long|float|double)\s+(\w+)\s*\(\)\s*[^;]/
           msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
@@ -647,7 +664,7 @@ class CodingStyleChecker
   def check_too_many_parameters
     @file.scan(/\(([^(),]*,){4,}[^()]*\)[ \t\n]+{/).each do |_match|
       if _match =~ /^\s*\/\// #Skip commented lines
-        next;
+        next
       end
       msg_brackets = '[' + @file_path + ']'
       msg_error = " F5 - A function should not need more than 4 arguments."
@@ -661,8 +678,8 @@ class CodingStyleChecker
     statement_detected = false
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       if line =~ /^.*?\s*(unsigned|signed)?\s*(void|int|char|short|long|float|double)\s+((\w|\*)+)\s*\([^)]*\)[^\S\r\n]*{/
         msg_brackets = '[' + @file_path +  ':' + line_nb.to_s + ']'
@@ -671,7 +688,7 @@ class CodingStyleChecker
         puts(msg_brackets.bold.red + msg_error.bold)
       else
         line[0] = '' while [' ', "\t"].include?(line[0])
-        if (statement_detected == true)
+        if statement_detected
           if line =~ /^{/
             msg_brackets = '[' + @file_path +  ':' + (line_nb - 1).to_s + ']'
             msg_error = " L4 - Curly brackets misplaced."
@@ -693,8 +710,8 @@ class CodingStyleChecker
     line_nb = 1
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       line.scan(/^.*?(unsigned|signed)?\s*(void|int|char|short|long|float|double)\s+(\w+)\s+\([^)]*\)[^;]\s*/) do |match|
         msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
@@ -710,8 +727,8 @@ class CodingStyleChecker
     line_nb = 1
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       line.scan(/(return|if|else if|else|while|for)\(/) do |match|
         msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
@@ -727,8 +744,8 @@ class CodingStyleChecker
     line_nb = 1
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       if line =~ /\w+  .+/
         msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
@@ -744,8 +761,8 @@ class CodingStyleChecker
     line_nb = 1
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       line.scan(/([^(\t ]+_t|int|signed|unsigned|char|long|short|float|double|void|const|struct [^ ]+)\*/) do |match|
         msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
@@ -759,11 +776,11 @@ class CodingStyleChecker
 
   def check_global_const
     line_nb = 1
-    scope_lvl = 0;
+    scope_lvl = 0
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       scope_lvl += line.count '{'
       scope_lvl -= line.count '}'
@@ -783,8 +800,8 @@ class CodingStyleChecker
     line_nb = 1
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       if line =~ /#define [^ ]+ [0-9]+([.][0-9]+)?/
         msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
@@ -825,8 +842,8 @@ class CodingStyleChecker
     line_nb = 1
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       quoted = false
       line.chars.each_with_index{|i, index|
@@ -855,8 +872,8 @@ class CodingStyleChecker
     line_nb = 1
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       # A space on both ends
       line.scan(/([^\t&|=^><+\-*%\/! ]=[^=]|[^&|=^><+\-*%\/!]=[^= \n])/) do
@@ -957,8 +974,8 @@ class CodingStyleChecker
     line_nb = 1
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       line.scan(/(if.*[^&|=^><+\-*%\/!]=[^=].*==.*)|(if.*==.*[^&|=^><+\-*%\/!]=[^=].*)/) do
         msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
@@ -989,8 +1006,8 @@ class CodingStyleChecker
     line_nb = 1
     @file.each_line do |line|
       if line =~ /^\s*\/\// #Skip commented lines
-        line_nb += 1;
-        next;
+        line_nb += 1
+        next
       end
       if line =~ /\s+(l|O)\s+/ && !(line =~ /^((\*\*)|(\/\/))/)
         msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
