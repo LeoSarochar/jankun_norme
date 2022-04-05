@@ -828,12 +828,18 @@ class CodingStyleChecker
         line_nb += 1;
         next;
       end
-      line.scan(/,[^ \n]/) do
-        msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
-        msg_error = ' L3 - Missing space after comma'
-        $minor += 1
-        puts(msg_brackets.bold.green + msg_error.bold)
-      end
+      quoted = false
+      line.chars.each_with_index{|i, index|
+        if i.include? "\"" or i.include? "\'"
+           quoted = !quoted
+        end
+        if !quoted and i == ',' and line[index + 1] != ' ' and !line[index + 1].include?("\n")
+            msg_brackets = '[' + @file_path + ':' + line_nb.to_s + ']'
+            msg_error = ' L3 - Missing space after comma'
+            $minor += 1
+            puts(msg_brackets.bold.green + msg_error.bold)
+        end
+     }
       line_nb += 1
     end
   end
